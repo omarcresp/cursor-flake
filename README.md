@@ -73,14 +73,6 @@ To ensure proper version management and take full advantage of Nix's reproducibi
 
 This approach ensures that your Cursor version is managed atomically with the rest of your system, providing better stability and reproducibility.
 
-## Legacy version
-
-There is a legacy app available in case you want to stick with 0.45.17 version. The community have a sentiment where they think this is the best version of cursor and from there all the newer ones has decreased the quality [ref](https://forum.cursor.com/t/its-remarkable-how-cursor-chat-0-45-3-7-cant-be-beat/68138)
-
-```nix
-cursor.packages.${pkgs.system}.legacy
-```
-
 ## Contributing
 
 We welcome contributions to improve this Nix package for Cursor! Here are some ways you can contribute:
