@@ -2,14 +2,14 @@
 
 let
   pname = "cursor";
-  version = "2.1.48";
-  downloadUrl = "https://downloads.cursor.com/production/ce371ffbf5e240ca47f4b5f3f20efed084991120/linux/x64/Cursor-2.1.48-x86_64.AppImage";
+  version = "2.2.20";
+  downloadUrl = "https://downloads.cursor.com/production/b3573281c4775bfc6bba466bf6563d3d498d1074/linux/x64/Cursor-2.2.20-x86_64.AppImage";
 
   inherit (pkgs.stdenvNoCC) hostPlatform stdenvNoCC;
 
   source = pkgs.fetchurl {
     url = downloadUrl;
-    hash = "sha256-Uq61ZZZzlRyDqPaNnJbteFQ4KC9usD5DdUSTGgvo2wI=";
+    hash = "sha256-dY42LaaP7CRbqY2tuulJOENa+QUGSL09m07PvxsZCr0=";
   };
 
   appimageContents = appimageTools.extractType2 {
