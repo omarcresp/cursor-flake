@@ -1,100 +1,106 @@
-# Cursor for NixOS
+# Cursor Flake
 
-This repository contains a Nix flake for packaging Cursor, an AI-first code editor, for use on NixOS systems.
+[![NixOS](https://img.shields.io/badge/NixOS-5277C3?style=flat&logo=nixos&logoColor=white)](https://nixos.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Auto Update](https://github.com/omarcresp/cursor-flake/actions/workflows/update.yml/badge.svg)](https://github.com/omarcresp/cursor-flake/actions/workflows/update.yml)
 
-## Table of Contents
+Nix flake for [Cursor](https://cursor.com), the AI-first code editor. Automatically updated three times daily.
 
-1. [About Cursor](#about-cursor)
-2. [Installation](#installation)
-3. [Usage](#usage)
-4. [Version Management](#version-management)
-5. [Contributing](#contributing)
-6. [License](#license)
+## Quick Start
 
-## About Cursor
+```sh
+# Try it without installing
+nix run github:omarcresp/cursor-flake
 
-Cursor is an AI-first code editor designed to enhance productivity through AI-assisted coding. It offers features like code completion, refactoring suggestions, and natural language command processing.
-
-For more information about Cursor, visit the [official website](https://cursor.sh/).
+# Or add to your shell temporarily
+nix shell github:omarcresp/cursor-flake
+```
 
 ## Installation
 
-To install Cursor using this flake, follow these steps:
+### NixOS (flake)
 
-1. Ensure you have flakes enabled in your NixOS configuration.
+```nix
+# flake.nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    cursor.url = "github:omarcresp/cursor-flake";
+  };
 
-2. Add this flake to your `flake.nix`:
+  outputs = { nixpkgs, cursor, ... }: {
+    nixosConfigurations.your-hostname = nixpkgs.lib.nixosSystem {
+      modules = [
+        ({ pkgs, ... }: {
+          environment.systemPackages = [
+            cursor.packages.${pkgs.system}.default
+          ];
+        })
+      ];
+    };
+  };
+}
+```
 
-   ```nix
-   {
-     inputs = {
-       nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; # Note that nixos unstable channel is required
-       cursor.url = "github:omarcresp/cursor-flake/main";
-     };
+### Home Manager
 
-     outputs = { self, nixpkgs, cursor }: {
-       # Your existing configuration...
-       
-       nixosConfigurations.your-hostname = nixpkgs.lib.nixosSystem {
-         # ...
-         modules = [
-           # ...
-           ({ pkgs, ... }: {
-             environment.systemPackages = [ cursor.packages.${pkgs.system}.default ];
-           })
-         ];
-       };
-     };
-   }
-   ```
+```nix
+# home.nix
+{ inputs, pkgs, ... }: {
+  home.packages = [
+    inputs.cursor.packages.${pkgs.system}.default
+  ];
+}
+```
 
-3. Run `sudo nixos-rebuild switch` to apply the changes. It can also be registered with home manager
+Then rebuild:
 
-## Usage
-
-After installation, you can launch Cursor from your application menu or by running `cursor` in your terminal.
+```sh
+sudo nixos-rebuild switch --flake .
+# or for home-manager
+home-manager switch --flake .
+```
 
 ## Version Management
 
-To ensure proper version management and take full advantage of Nix's reproducibility features, we recommend the following:
+This flake disables Cursor's built-in auto-update (`--no-update` flag) to let Nix handle versioning. To update:
 
-1. **Disable auto-updates in Cursor**: 
-   - Open Cursor
-   - Go to Settings (gear icon) > Updates
-   - Disable "Automatically download and install updates"
+```sh
+nix flake update cursor
+sudo nixos-rebuild switch --flake .
+```
 
-2. **Update using Nix**:
-   To update Cursor, update the flake input in your `flake.nix` and rebuild your system:
+### Auto-Updates
 
-   ```sh
-   nix flake update
-   sudo nixos-rebuild switch
-   ```
+This repository automatically checks for new Cursor releases **three times daily** via GitHub Actions. When a new version is detected, it:
 
-This approach ensures that your Cursor version is managed atomically with the rest of your system, providing better stability and reproducibility.
+1. Fetches the latest version from Cursor's API
+2. Computes the new package hash
+3. Commits and pushes the update
+
+You'll always have access to the latest version by simply updating your flake inputs.
+
+## Platform Support
+
+| Platform | Status |
+|----------|--------|
+| Linux x86_64 | Supported |
+| macOS | Unsupported |
 
 ## Contributing
 
-We welcome contributions to improve this Nix package for Cursor! Here are some ways you can contribute:
+1. Fork the repository
+2. Create your feature branch
+3. Submit a pull request
 
-1. **Testing**: Try the package on different NixOS configurations and report any issues.
-2. **Documentation**: Help improve this README or add wiki pages with tips and tricks.
-3. **Code Improvements**: Suggest improvements to the Nix expression or flake configuration.
-4. **Version Updates**: Help keep the package up-to-date with the latest Cursor releases.
+For version updates, the automated CI handles this. Manual updates can be done by running:
 
-To contribute:
-
-1. Fork this repository
-2. Create a new branch for your changes
-3. Make your changes and commit them
-4. Push to your fork and submit a pull request
+```sh
+node update.js
+```
 
 ## License
 
-This Nix package is distributed under the MIT License. See the `LICENSE` file for more information.
+MIT License. See [LICENSE](LICENSE) for details.
 
-Note: While this package is MIT licensed, Cursor itself may have its own licensing terms. Please refer to the [Cursor website](https://cursor.sh/) for details on Cursor's license.
-
----
-
-For any questions or issues, please open an issue on the GitHub repository.
+Cursor itself has its own [licensing terms](https://cursor.com).
