@@ -1,0 +1,45 @@
+name: Check for Cursor Updates
+
+on:
+  schedule:
+    - cron: "0 */8 * * *" # Three times a day
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Check for updates
+        id: update
+        run: node update.js
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet default.nix; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            VERSION=$(grep -oP 'version\s*=\s*"\K[^"]+' default.nix)
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add default.nix
+          git commit -m "${{ steps.changes.outputs.version }}"
+          git push
