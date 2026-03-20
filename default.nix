@@ -20,6 +20,7 @@ let
   wrappedAppimage = appimageTools.wrapType2 {
     inherit version pname;
     src = source;
+    extraPkgs = pkgs: [ pkgs.xorg.libxkbfile ];
   };
 
 in
