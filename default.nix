@@ -2,14 +2,14 @@
 
 let
   pname = "cursor";
-  version = "2.6.20";
-  downloadUrl = "https://downloads.cursor.com/production/b29eb4ee5f9f6d1cb2afbc09070198d3ea6ad76f/linux/x64/Cursor-2.6.20-x86_64.AppImage";
+  version = "2.6.21";
+  downloadUrl = "https://downloads.cursor.com/production/fea2f546c979a0a4ad1deab23552a43568807592/linux/x64/Cursor-2.6.21-x86_64.AppImage";
 
   inherit (pkgs.stdenvNoCC) hostPlatform stdenvNoCC;
 
   source = pkgs.fetchurl {
     url = downloadUrl;
-    hash = "sha256-fEvDNnFdJ2WhFam6tw1rnDbNQEZmxsoraIuvrHuKy+w=";
+    hash = "sha256-ZohAVWsde5fOac0JL9kc8ql/ZGohbc7S0yStARXQVSU=";
   };
 
   appimageContents = appimageTools.extractType2 {
@@ -20,7 +20,7 @@ let
   wrappedAppimage = appimageTools.wrapType2 {
     inherit version pname;
     src = source;
-    extraPkgs = pkgs: [ pkgs.xorg.libxkbfile ];
+    extraPkgs = pkgs: [ pkgs.libxkbfile ];
   };
 
 in
