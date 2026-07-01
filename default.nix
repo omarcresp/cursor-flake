@@ -9,7 +9,7 @@ let
 
   source = pkgs.fetchurl {
     url = downloadUrl;
-    hash = "sha256-psqsSX6fKLAq/YVjvLZxigWhlHzhD1x/KufDXYHUcyA=";
+    hash = "sha256-dG61VYGMHPip57ldzNICEi1yPc4s1dON+MlDGiKadKc=";
   };
 
   appimageContents = appimageTools.extractType2 {
