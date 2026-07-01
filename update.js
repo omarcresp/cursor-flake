@@ -1,7 +1,7 @@
 import { execSync } from "child_process";
 import { readFileSync, writeFileSync } from "fs";
 
-const DOWNLOAD_API = "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=latest";
+const DOWNLOAD_API = "https://api2.cursor.sh/updates/api/download/stable/linux-x64/cursor";
 const NIX_FILE = "default.nix";
 
 async function getLatestVersion() {
