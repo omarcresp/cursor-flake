@@ -51,6 +51,12 @@ pkgs.stdenvNoCC.mkDerivation {
           cp -a ${appimageContents}/usr/share/icons $out/share/
           install -Dm 644 ${appimageContents}/cursor.desktop -t $out/share/applications/
 
+          # The extracted icons are named `cursor.png`, but the upstream desktop
+          # entry references `Icon=co.anysphere.cursor`, so icon-theme lookup fails
+          # and no icon shows. Point the desktop entry at the actual icon name.
+          substituteInPlace $out/share/applications/cursor.desktop \
+            --replace-quiet "Icon=co.anysphere.cursor" "Icon=cursor"
+
           wrapProgram $out/bin/cursor \
             --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true}} --no-update"
         ''
