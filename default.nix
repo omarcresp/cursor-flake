@@ -1,16 +1,20 @@
-{ pkgs, appimageTools, ... }:
+{
+  pkgs,
+  appimageTools,
+  lib,
+  ...
+}:
 
 let
   pname = "cursor";
-  version = "3.9.16";
-  downloadUrl = "https://downloads.cursor.com/production/042b3c1a4c53f2c3808067f519fbfc67b72cad8b/linux/x64/Cursor-3.9.16-x86_64.AppImage";
-
   inherit (pkgs.stdenvNoCC) hostPlatform stdenvNoCC;
 
-  source = pkgs.fetchurl {
-    url = downloadUrl;
-    hash = "sha256-dG61VYGMHPip57ldzNICEi1yPc4s1dON+MlDGiKadKc=";
-  };
+  release = lib.importJSON ./sources.json;
+  inherit (release) version;
+  sourceInfo =
+    release.sources.${hostPlatform.system}
+      or (throw "cursor: unsupported platform ${hostPlatform.system}");
+  source = pkgs.fetchurl sourceInfo;
 
   appimageContents = appimageTools.extractType2 {
     inherit version pname;
@@ -67,15 +71,19 @@ pkgs.stdenvNoCC.mkDerivation {
           mkdir -p "$APP_DIR"
           cp -Rp Cursor.app "$APP_DIR"
           mkdir -p "$out/bin"
-          cat << EOF > "$out/bin/cursor"
-
-          #!${stdenvNoCC.shell}
-          open -na "$CURSOR_APP" --args "\$@"
-          EOF
-          chmod +x "$out/bin/cursor"
+          ln -s "$CURSOR_APP/Contents/Resources/app/bin/cursor" "$out/bin/cursor"
         ''
     }
 
     runHook postInstall
   '';
+
+  meta = {
+    description = "AI-powered code editor built on VS Code";
+    homepage = "https://cursor.com";
+    license = lib.licenses.unfree;
+    sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
+    platforms = builtins.attrNames release.sources;
+    mainProgram = "cursor";
+  };
 }

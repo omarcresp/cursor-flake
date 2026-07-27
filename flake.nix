@@ -12,10 +12,13 @@
       nixpkgs,
       flake-utils,
     }:
-    flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" ] (
+    flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-darwin" ] (
       system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfreePredicate = pkg: nixpkgs.lib.getName pkg == "cursor";
+        };
       in
       {
         packages.default = pkgs.callPackage ./default.nix { };

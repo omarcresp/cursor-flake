@@ -1,0 +1,57 @@
+{
+  "task": "intel-macos-nix-2026-07-27",
+  "sources": [
+    {
+      "title": "NixOS 26.05 released — Deprecation of x86_64-darwin",
+      "url": "https://nixos.org/blog/announcements/2026/nixos-2605/",
+      "tier": "canonical"
+    },
+    {
+      "title": "Nixpkgs 26.05 release notes",
+      "url": "https://nixos.org/manual/nixpkgs/stable/release-notes",
+      "tier": "canonical"
+    },
+    {
+      "title": "Current nixos-unstable x86_64-darwin configuration",
+      "url": "https://raw.githubusercontent.com/NixOS/nixpkgs/nixos-unstable/pkgs/top-level/config.nix",
+      "tier": "canonical-source"
+    },
+    {
+      "title": "Nixpkgs PR #492189 — add hard error for x86_64-darwin",
+      "url": "https://github.com/NixOS/nixpkgs/pull/492189",
+      "tier": "canonical-source"
+    },
+    {
+      "title": "Nix upstream flake platform matrix",
+      "url": "https://github.com/NixOS/nix/blob/master/flake.nix",
+      "tier": "canonical-source"
+    },
+    {
+      "title": "Nix 2.35.1 Intel Darwin binary",
+      "url": "https://releases.nixos.org/nix/nix-2.35.1/nix-2.35.1-x86_64-darwin.tar.xz",
+      "tier": "canonical-artifact"
+    },
+    {
+      "title": "Cursor stable Intel macOS release API",
+      "url": "https://api2.cursor.sh/updates/api/download/stable/darwin-x64/cursor",
+      "tier": "upstream-api"
+    }
+  ],
+  "localEvidence": [
+    {
+      "claim": "Repository lock predates hard removal",
+      "revision": "567a49d1913ce81ac6e9582e3553dd90a955875f",
+      "revisionDate": "2026-06-15"
+    },
+    {
+      "claim": "Current unstable rejects normal Intel evaluation",
+      "revision": "624af665418d3c65d544145b4d34ad696439570e",
+      "observedError": "Nixpkgs 26.11 has dropped support for x86_64-darwin."
+    },
+    {
+      "claim": "Force mode is internally broken",
+      "revision": "624af665418d3c65d544145b4d34ad696439570e",
+      "observedError": "libiconv is not available on x86_64-darwin"
+    }
+  ]
+}

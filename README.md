@@ -85,7 +85,7 @@ You'll always have access to the latest version by simply updating your flake in
 | Platform | Status |
 |----------|--------|
 | Linux x86_64 | Supported |
-| macOS | Unsupported |
+| macOS Apple Silicon | Supported |
 
 ## Contributing
 

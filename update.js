@@ -1,83 +1,107 @@
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { readFileSync, writeFileSync } from "fs";
 
-const DOWNLOAD_API = "https://api2.cursor.sh/updates/api/download/stable/linux-x64/cursor";
-const NIX_FILE = "default.nix";
+const DOWNLOAD_API =
+  "https://api2.cursor.sh/updates/api/download/stable";
+const SOURCES_FILE = "sources.json";
+const TARGETS = {
+  "x86_64-linux": "linux-x64",
+  "aarch64-darwin": "darwin-arm64",
+};
 
-async function getLatestVersion() {
-  const response = await fetch(DOWNLOAD_API, {
-    headers: {
-      "User-Agent": "Cursor-Version-Checker",
-      "Cache-Control": "no-cache",
-    },
-  });
-  return response.json();
+async function getLatestRelease() {
+  const releases = await Promise.all(
+    Object.entries(TARGETS).map(async ([system, apiTarget]) => {
+      const response = await fetch(`${DOWNLOAD_API}/${apiTarget}/cursor`, {
+        headers: {
+          "User-Agent": "Cursor-Version-Checker",
+          "Cache-Control": "no-cache",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Cursor API returned ${response.status} for ${system}`
+        );
+      }
+
+      const release = await response.json();
+      if (!release.version || !release.downloadUrl) {
+        throw new Error(`Cursor API returned invalid metadata for ${system}`);
+      }
+
+      return [system, release];
+    })
+  );
+
+  const versions = new Set(releases.map(([, release]) => release.version));
+  if (versions.size !== 1) {
+    throw new Error(
+      `Cursor platforms are on different versions: ${[...versions].join(", ")}`
+    );
+  }
+
+  return {
+    version: releases[0][1].version,
+    sources: Object.fromEntries(
+      releases.map(([system, release]) => [
+        system,
+        { url: release.downloadUrl },
+      ])
+    ),
+  };
 }
 
-function getCurrentVersion() {
-  const content = readFileSync(NIX_FILE, "utf-8");
-  const versionMatch = content.match(/version\s*=\s*"([^"]+)"/);
-  return versionMatch ? versionMatch[1] : null;
+function getCurrentRelease() {
+  return JSON.parse(readFileSync(SOURCES_FILE, "utf-8"));
 }
 
 function getHashForUrl(url) {
-  const result = execSync(`nix-prefetch-url --type sha256 "${url}"`, {
-    encoding: "utf-8",
-  }).trim();
-  const sriHash = execSync(
-    `nix hash convert --to sri --hash-algo sha256 ${result}`,
+  const result = execFileSync(
+    "nix-prefetch-url",
+    ["--type", "sha256", url],
+    { encoding: "utf-8" }
+  ).trim();
+  const sriHash = execFileSync(
+    "nix",
+    ["hash", "convert", "--to", "sri", "--hash-algo", "sha256", result],
     { encoding: "utf-8" }
   ).trim();
   return sriHash;
 }
 
-function updateNixFile(version, downloadUrl, hash) {
-  let content = readFileSync(NIX_FILE, "utf-8");
-
-  content = content.replace(
-    /version\s*=\s*"[^"]+"/,
-    `version = "${version}"`
+function releaseIsCurrent(current, latest) {
+  return (
+    current.version === latest.version &&
+    Object.entries(latest.sources).every(
+      ([system, source]) => current.sources?.[system]?.url === source.url
+    )
   );
-  content = content.replace(
-    /downloadUrl\s*=\s*"[^"]+"/,
-    `downloadUrl = "${downloadUrl}"`
-  );
-  content = content.replace(
-    /hash\s*=\s*"[^"]+"/,
-    `hash = "${hash}"`
-  );
-
-  writeFileSync(NIX_FILE, content);
 }
 
 async function main() {
-  console.log("Fetching latest Cursor version...");
-  const latest = await getLatestVersion();
+  console.log("Fetching latest Cursor release...");
+  const latest = await getLatestRelease();
   console.log("Latest:", latest);
 
-  const currentVersion = getCurrentVersion();
-  console.log("Current version:", currentVersion);
+  const current = getCurrentRelease();
+  console.log("Current version:", current.version);
 
-  const latestVersion = latest.version;
-  const downloadUrl = latest.downloadUrl;
-
-  if (currentVersion === latestVersion) {
+  if (releaseIsCurrent(current, latest)) {
     console.log("Already up to date!");
-    process.exit(0);
+    return;
   }
 
-  console.log(`New version available: ${latestVersion}`);
-  console.log("Fetching hash for new version...");
+  console.log(`New release available: ${latest.version}`);
+  for (const [system, source] of Object.entries(latest.sources)) {
+    console.log(`Fetching hash for ${system}...`);
+    source.hash = getHashForUrl(source.url);
+  }
 
-  const hash = getHashForUrl(downloadUrl);
-  console.log("Hash:", hash);
+  console.log(`Updating ${SOURCES_FILE}...`);
+  writeFileSync(SOURCES_FILE, `${JSON.stringify(latest, null, 2)}\n`);
 
-  console.log("Updating default.nix...");
-  updateNixFile(latestVersion, downloadUrl, hash);
-
-  console.log("Done! Updated to version", latestVersion);
-  console.log("::set-output name=updated::true");
-  console.log(`::set-output name=version::${latestVersion}`);
+  console.log("Done! Updated to version", latest.version);
 }
 
 main().catch((err) => {
