@@ -1,13 +1,13 @@
 {
-  "version": "3.19.7",
+  "version": "3.19.13",
   "sources": {
     "x86_64-linux": {
-      "url": "https://downloads.cursor.com/production/90de2327392570a5f5f625c656c6749d228e6437/linux/x64/Cursor-3.19.7-x86_64.AppImage",
-      "hash": "sha256-2q0ashOhaZnrtHsi4clksYb69lvn7MbSr9cKMalAxBQ="
+      "url": "https://downloads.cursor.com/production/dd066f332fcea7382764400fde902f61920648d5/linux/x64/Cursor-3.19.13-x86_64.AppImage",
+      "hash": "sha256-B9kDP/TsvE2OmhYEq77ZyiQttho3FQlRa4Ux1RDptQg="
     },
     "aarch64-darwin": {
-      "url": "https://downloads.cursor.com/production/90de2327392570a5f5f625c656c6749d228e6437/darwin/arm64/Cursor-darwin-arm64.dmg",
-      "hash": "sha256-gGJ+ts+NQ4Xa+gwGSB/CwzUEBR1R4ZpIhJpCNYJbmro="
+      "url": "https://downloads.cursor.com/production/dd066f332fcea7382764400fde902f61920648d5/darwin/arm64/Cursor-darwin-arm64.dmg",
+      "hash": "sha256-kDroiBbBXD/eOfdlSjeDt5ObSiLRaLmrpJOKstKvxE8="
     }
   }
 }
